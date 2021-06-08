@@ -10,19 +10,43 @@ class GitCommand {
     }
 
     //Command: git status
-    // status(){}
+    status(){        
+        /*
+            For assignment #1:
+            Create logic here and run unit testing.
+        */
+        let count = Object.keys(this.working_directory.new_changes).length;
+        if(count){
+            let files = [];
+            for(const [key,value] of Object.entries(this.working_directory.new_changes)){
+                files.push(key);
+            }
+            return `You have ${count} change/s.\n`+files.join('\n');
+        }
+        
+       return "You have 0 change/s.\n";
+    }
 
     //Command: git add <filename/file directory/wildcard> 
     add(path_file){
         let modified_files = this.working_directory.new_changes;
-        
+        // console.log("path",path_file);
         if(modified_files[path_file]){
             this.staging.push(modified_files[path_file]);
             delete modified_files[path_file];
+        }else if(path_file == "*"){
+            let file_list = Object.keys(modified_files);
+
+            for(let row=0;row<file_list.length;row++){
+                if(!file_list[row].startsWith(".")){
+                    this.staging.push(modified_files[file_list[row]]);
+                    delete this.working_directory.new_changes[file_list[row]];
+                }
+            }
+        }else if(path_file == "."){
+            this.staging.push(modified_files);
+            this.working_directory.new_changes = {};
         }
-        /*
-            Create logic here and run unit testing.
-        */
         else{
             return `Failed to add ${path_file}! File is not modified or missing.`;
         }
